@@ -2,6 +2,7 @@ package cliente
 
 import (
 	"context"
+	"errors"
 )
 
 type ClienteRepository interface {
@@ -11,3 +12,8 @@ type ClienteRepository interface {
 	save(ctx context.Context, cliente Cliente) error
 	update(ctx context.Context, cliente Cliente) error
 }
+
+var (
+	ErrEmptyList = errors.New("la lista de productos esta vacia")
+	ErrNotFound  = errors.New("producto no encontrado")
+)
