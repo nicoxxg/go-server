@@ -7,10 +7,13 @@ import (
 
 	handlerClient "github.com/nicoxxg/go-server/cmd/server/handler/cliente"
 
+	handlerTurno "github.com/nicoxxg/go-server/cmd/server/handler/turno"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/nicoxxg/go-server/internal/domain/cliente"
+	"github.com/nicoxxg/go-server/internal/domain/turno"
 )
 
 const (
@@ -18,7 +21,6 @@ const (
 )
 
 func main() {
-	fmt.Println("a")
 	db := connectDB()
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -26,6 +28,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	turnoRepository := turno.NewTurnoRepository(db)
+
+	turnoService := turno.NewTurnoService(turnoRepository)
+
+	turnoController := handlerTurno.NewTurnoController(turnoService)
 
 	clienteRepository := cliente.NewClienteRepository(db)
 
@@ -34,6 +41,10 @@ func main() {
 	clientController := handlerClient.NewClientController(clientService)
 
 	router.GET("/clientes", clientController.FindAll())
+
+	router.POST("/turno", turnoController.Save())
+
+	router.GET("/turno", turnoController.FindAllTurnos())
 
 	if err := router.Run(puerto); err != nil {
 		panic(err)

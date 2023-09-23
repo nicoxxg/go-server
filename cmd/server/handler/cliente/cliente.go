@@ -28,6 +28,7 @@ func (c *ClienteController) FindAll() gin.HandlerFunc {
 			})
 			return
 		}
+
 		ctx.JSON(http.StatusOK, gin.H{
 			"data": clientes,
 		})
