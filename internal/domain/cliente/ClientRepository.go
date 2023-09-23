@@ -16,6 +16,50 @@ func NewClienteRepository(database *sql.DB) ClienteRepository {
 	}
 }
 
+func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Cliente, error) {
+
+	query := `SELECT id, nombre, apellido, email, activo
+	FROM go_server.cliente
+	WHERE email = ?;
+	`
+
+	var cliente Cliente
+
+	err := r.db.QueryRow(query, email).Scan(&cliente.Id, &cliente.Nombre, &cliente.Apellido, &cliente.Email, &cliente.Activo)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Cliente{}, errors.New("Cliente No Encontrado")
+		}
+
+		return Cliente{}, nil
+	}
+
+	return cliente, nil
+
+}
+
+// findById implements ClienteRepository.
+func (r *clienteRepository) findById(ctx context.Context, id int64) (Cliente, error) {
+	query := `SELECT id, nombre, apellido, email, activo
+	FROM go_server.cliente
+	WHERE id = ?;
+	`
+
+	var cliente Cliente
+	err := r.db.QueryRow(query, id).Scan(&cliente.Id, &cliente.Nombre, &cliente.Apellido, &cliente.Email, &cliente.Activo)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Cliente{}, errors.New("Cliente No Encontrado")
+		}
+
+		return Cliente{}, nil
+	}
+
+	return cliente, nil
+}
+
 // findAll implements ClienteRepository.
 func (r *clienteRepository) findAll(ctx context.Context) ([]Cliente, error) {
 	query := `SELECT id, nombre, apellido, email, activo
@@ -47,14 +91,6 @@ func (r *clienteRepository) findAll(ctx context.Context) ([]Cliente, error) {
 }
 
 // findByEmail implements ClienteRepository.
-func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Cliente, error) {
-	panic("unimplemented")
-}
-
-// findById implements ClienteRepository.
-func (r *clienteRepository) findById(ctx context.Context, id string) (Cliente, error) {
-	panic("unimplemented")
-}
 
 // save implements ClienteRepository.
 func (r *clienteRepository) save(ctx context.Context, cliente Cliente) error {

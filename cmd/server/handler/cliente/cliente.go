@@ -2,6 +2,7 @@ package cliente
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicoxxg/go-server/internal/domain/cliente"
@@ -14,6 +15,58 @@ type ClienteController struct {
 func NewClientController(service cliente.ClientService) *ClienteController {
 	return &ClienteController{
 		clienteService: service,
+	}
+}
+
+func (c *ClienteController) FindClienteByEmail() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := ctx.Query("email")
+
+		if email == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"mensaje": "emial vacio",
+			})
+			return
+		}
+		cliente, err := c.clienteService.FindByEmail(ctx, email)
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"mensaje": "no se pudo Obtener el Cliente",
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": cliente,
+		})
+	}
+}
+
+func (c *ClienteController) FindClientById() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		idParam, err := strconv.Atoi(ctx.Param("id"))
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"mensaje": "id invalido",
+			})
+			return
+		}
+		id := int64(idParam)
+
+		clienteObtenido, err := c.clienteService.FindById(ctx, id)
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"mensaje": "no se pudo Obtener el Cliente",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": clienteObtenido,
+		})
+
 	}
 }
 

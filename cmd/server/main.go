@@ -46,6 +46,10 @@ func main() {
 
 	router.GET("/turno", turnoController.FindAllTurnos())
 
+	router.GET("/cliente/:id", clientController.FindClientById())
+
+	router.GET("/cliente/email", clientController.FindClienteByEmail())
+
 	if err := router.Run(puerto); err != nil {
 		panic(err)
 	}
