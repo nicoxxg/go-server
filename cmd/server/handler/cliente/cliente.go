@@ -18,6 +18,36 @@ func NewClientController(service cliente.ClientService) *ClienteController {
 	}
 }
 
+func (c *ClienteController) SaveClient() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var request cliente.ClientRequest
+
+		err := ctx.Bind(&request)
+
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"message": "bad_request",
+			})
+
+			return
+		}
+
+		clienteObtenido, err := c.clienteService.SaveClient(ctx, request)
+
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"message": "internal_server_error",
+			})
+
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": clienteObtenido,
+		})
+
+	}
+}
+
 func (c *ClienteController) FindClienteByEmail() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		email := ctx.Query("email")

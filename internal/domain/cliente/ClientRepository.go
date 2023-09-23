@@ -16,6 +16,40 @@ func NewClienteRepository(database *sql.DB) ClienteRepository {
 	}
 }
 
+func (r *clienteRepository) save(ctx context.Context, cliente Cliente) (Cliente, error) {
+	query := `INSERT INTO go_server.cliente(nombre, apellido, email,contraseña, activo)
+	VALUES(?,?,?,?,?)
+	`
+	statement, err := r.db.Prepare(query)
+	if err != nil {
+		return Cliente{}, errors.New("error preparing statement")
+	}
+	defer statement.Close()
+	cliente.Activo = true
+
+	result, err := statement.Exec(
+		cliente.Nombre,
+		cliente.Apellido,
+		cliente.Email,
+		cliente.Contrasena,
+		cliente.Activo,
+	)
+
+	if err != nil {
+		return Cliente{}, errors.New("error executing statement")
+	}
+
+	lastId, err := result.LastInsertId()
+
+	if err != nil {
+		return Cliente{}, errors.New("error insert lastId")
+	}
+
+	cliente.Id = lastId
+
+	return cliente, nil
+}
+
 func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Cliente, error) {
 
 	query := `SELECT id, nombre, apellido, email, activo
@@ -93,11 +127,8 @@ func (r *clienteRepository) findAll(ctx context.Context) ([]Cliente, error) {
 // findByEmail implements ClienteRepository.
 
 // save implements ClienteRepository.
-func (r *clienteRepository) save(ctx context.Context, cliente Cliente) error {
-	panic("unimplemented")
-}
 
 // update implements ClienteRepository.
-func (r *clienteRepository) update(ctx context.Context, cliente Cliente) error {
+func (r *clienteRepository) update(ctx context.Context, cliente Cliente) (Cliente, error) {
 	panic("unimplemented")
 }

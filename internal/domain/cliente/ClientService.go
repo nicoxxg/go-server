@@ -2,7 +2,10 @@ package cliente
 
 import (
 	"context"
+	"errors"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type clienteService struct {
@@ -13,14 +16,33 @@ type ClientService interface {
 	FindAll(ctx context.Context) ([]Cliente, error)
 	FindById(ctx context.Context, id int64) (Cliente, error)
 	FindByEmail(ctx context.Context, email string) (Cliente, error)
-	Save(ctx context.Context, cliente Cliente) error
-	Update(ctx context.Context, cliente Cliente) error
+	SaveClient(ctx context.Context, cliente ClientRequest) (Cliente, error)
+	Update(ctx context.Context, cliente Cliente) (Cliente, error)
 }
 
 func NewClientService(clienteRepository ClienteRepository) ClientService {
 	return &clienteService{
 		clienteRepository: clienteRepository,
 	}
+}
+
+func (s *clienteService) SaveClient(ctx context.Context, cliente ClientRequest) (Cliente, error) {
+	contraseñaEncriptada, err := bcrypt.GenerateFromPassword([]byte(cliente.Contrasena), bcrypt.DefaultCost)
+
+	if err != nil {
+		return Cliente{}, errors.New("eror al hashear la contraseña")
+	}
+	cliente.Contrasena = string(contraseñaEncriptada)
+
+	clienteTransforado := requestToClient(cliente)
+
+	response, err := s.clienteRepository.save(ctx, clienteTransforado)
+
+	if err != nil {
+		return Cliente{}, errors.New("error en servicio: metodo Post")
+	}
+
+	return response, nil
 }
 
 // findByEmail implements ClientService.
@@ -57,14 +79,17 @@ func (s *clienteService) FindAll(ctx context.Context) ([]Cliente, error) {
 	return productos, nil
 }
 
-// findById implements ClientService.
-
-// save implements ClientService.
-func (s *clienteService) Save(ctx context.Context, cliente Cliente) error {
+// update implements ClientService.
+func (s *clienteService) Update(ctx context.Context, cliente Cliente) (Cliente, error) {
 	panic("unimplemented")
 }
+func requestToClient(clientRequest ClientRequest) Cliente {
+	var cliente Cliente
 
-// update implements ClientService.
-func (s *clienteService) Update(ctx context.Context, cliente Cliente) error {
-	panic("unimplemented")
+	cliente.Nombre = clientRequest.Nombre
+	cliente.Apellido = clientRequest.Apellido
+	cliente.Email = clientRequest.Email
+	cliente.Contrasena = clientRequest.Contrasena
+
+	return cliente
 }

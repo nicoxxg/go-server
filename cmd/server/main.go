@@ -50,6 +50,8 @@ func main() {
 
 	router.GET("/cliente/email", clientController.FindClienteByEmail())
 
+	router.POST("/cliente", clientController.SaveClient())
+
 	if err := router.Run(puerto); err != nil {
 		panic(err)
 	}
