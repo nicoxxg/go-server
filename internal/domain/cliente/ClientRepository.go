@@ -16,7 +16,50 @@ func NewClienteRepository(database *sql.DB) ClienteRepository {
 	}
 }
 
+// update implements ClienteRepository.
+func (r *clienteRepository) update(ctx context.Context, cliente Cliente) (Cliente, error) {
+	query := `
+        UPDATE go_server.cliente
+        SET nombre = ?, apellido = ?, email = ?, contraseña = ?, activo = ?
+        WHERE id = ?
+    `
+	statement, err := r.db.Prepare(query)
+
+	if err != nil {
+		return Cliente{}, errors.New("error preparing statement")
+	}
+
+	defer statement.Close()
+
+	result, err := statement.Exec(
+		cliente.Nombre,
+		cliente.Apellido,
+		cliente.Email,
+		cliente.Contrasena,
+		cliente.Activo,
+		cliente.Id, // Suponiendo que tengas el campo "Id" en tu struct Cliente
+	)
+
+	if err != nil {
+		return Cliente{}, errors.New("error executing statement")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return Cliente{}, errors.New("error getting rows affected")
+	}
+
+	if rowsAffected == 0 {
+		return Cliente{}, errors.New("no rows updated")
+	}
+
+	return cliente, nil
+}
+
+// save implements ClienteRepository.
+
 func (r *clienteRepository) save(ctx context.Context, cliente Cliente) (Cliente, error) {
+
 	query := `INSERT INTO go_server.cliente(nombre, apellido, email,contraseña, activo)
 	VALUES(?,?,?,?,?)
 	`
@@ -49,6 +92,8 @@ func (r *clienteRepository) save(ctx context.Context, cliente Cliente) (Cliente,
 
 	return cliente, nil
 }
+
+// findByEmail implements ClienteRepository.
 
 func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Cliente, error) {
 
@@ -122,13 +167,4 @@ func (r *clienteRepository) findAll(ctx context.Context) ([]Cliente, error) {
 
 	return clientes, nil
 
-}
-
-// findByEmail implements ClienteRepository.
-
-// save implements ClienteRepository.
-
-// update implements ClienteRepository.
-func (r *clienteRepository) update(ctx context.Context, cliente Cliente) (Cliente, error) {
-	panic("unimplemented")
 }

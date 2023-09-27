@@ -18,6 +18,37 @@ func NewClientController(service cliente.ClientService) *ClienteController {
 	}
 }
 
+func (c *ClienteController) UpdateClient() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var request cliente.ClientRequest
+
+		err := ctx.Bind(&request)
+
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"message": "bad_request",
+			})
+			return
+		}
+
+		clienteObtenido, err := c.clienteService.UpdateClient(ctx, request)
+
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"message": "internal_server_error",
+				"error":   err.Error(),
+			})
+
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": clienteObtenido,
+		})
+
+	}
+
+}
+
 func (c *ClienteController) SaveClient() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request cliente.ClientRequest
@@ -37,6 +68,7 @@ func (c *ClienteController) SaveClient() gin.HandlerFunc {
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"message": "internal_server_error",
+				"error":   err.Error(),
 			})
 
 			return
@@ -62,7 +94,8 @@ func (c *ClienteController) FindClienteByEmail() gin.HandlerFunc {
 
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"mensaje": "no se pudo Obtener el Cliente",
+				"mensaje": "internal_server_error",
+				"error":   err.Error(),
 			})
 			return
 		}
@@ -89,7 +122,8 @@ func (c *ClienteController) FindClientById() gin.HandlerFunc {
 
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"mensaje": "no se pudo Obtener el Cliente",
+				"mensaje": "internal_server_error",
+				"error":   err.Error(),
 			})
 			return
 		}

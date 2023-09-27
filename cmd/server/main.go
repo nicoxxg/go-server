@@ -52,6 +52,8 @@ func main() {
 
 	router.POST("/cliente", clientController.SaveClient())
 
+	router.PATCH("/cliente/update", clientController.UpdateClient())
+
 	if err := router.Run(puerto); err != nil {
 		panic(err)
 	}

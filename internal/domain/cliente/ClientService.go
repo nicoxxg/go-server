@@ -17,13 +17,32 @@ type ClientService interface {
 	FindById(ctx context.Context, id int64) (Cliente, error)
 	FindByEmail(ctx context.Context, email string) (Cliente, error)
 	SaveClient(ctx context.Context, cliente ClientRequest) (Cliente, error)
-	Update(ctx context.Context, cliente Cliente) (Cliente, error)
+	UpdateClient(ctx context.Context, cliente ClientRequest) (Cliente, error)
 }
 
 func NewClientService(clienteRepository ClienteRepository) ClientService {
 	return &clienteService{
 		clienteRepository: clienteRepository,
 	}
+}
+
+func (s *clienteService) UpdateClient(ctx context.Context, clienteRequest ClientRequest) (Cliente, error) {
+
+	client, err := s.clienteRepository.findByEmail(ctx, clienteRequest.Email)
+
+	if err != nil {
+		return Cliente{}, errors.New("error en servicio: Cliente no encontrado")
+	}
+
+	updateClientProperties(&client, clienteRequest)
+
+	result, err := s.clienteRepository.update(ctx, client)
+
+	if err != nil {
+		return Cliente{}, errors.New("error en servicio: Metodo UPDATE")
+	}
+
+	return result, nil
 }
 
 func (s *clienteService) SaveClient(ctx context.Context, cliente ClientRequest) (Cliente, error) {
@@ -78,11 +97,28 @@ func (s *clienteService) FindAll(ctx context.Context) ([]Cliente, error) {
 	}
 	return productos, nil
 }
+func updateClientProperties(client *Cliente, clientRequest ClientRequest) error {
+	if clientRequest.Nombre != "" {
+		client.Nombre = clientRequest.Nombre
+	}
+	if clientRequest.Apellido != "" {
+		client.Apellido = clientRequest.Apellido
+	}
+	if clientRequest.Email != "" {
+		client.Email = clientRequest.Email
+	}
+	if clientRequest.Contrasena != "" {
+		contraseñaEncriptada, err := bcrypt.GenerateFromPassword([]byte(clientRequest.Contrasena), bcrypt.DefaultCost)
 
-// update implements ClientService.
-func (s *clienteService) Update(ctx context.Context, cliente Cliente) (Cliente, error) {
-	panic("unimplemented")
+		if err != nil {
+			return errors.New("eror al hashear la contraseña")
+		}
+		client.Contrasena = string(contraseñaEncriptada)
+	}
+
+	return nil
 }
+
 func requestToClient(clientRequest ClientRequest) Cliente {
 	var cliente Cliente
 
@@ -93,3 +129,5 @@ func requestToClient(clientRequest ClientRequest) Cliente {
 
 	return cliente
 }
+
+// update implements ClientService.
