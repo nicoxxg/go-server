@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	handlerClient "github.com/nicoxxg/go-server/cmd/server/handler/cliente"
 	"github.com/nicoxxg/go-server/pkg/middleware"
@@ -94,11 +95,11 @@ func connectDB() *sql.DB {
 		log.Fatal(err)
 	}
 	var dbUsername, dbPassword, dbHost, dbPort, dbName string
-	dbUsername = "root"
-	dbPassword = "root"
-	dbHost = "localhost"
-	dbPort = "3306"
-	dbName = "go_server"
+	dbUsername = string(os.Getenv("DATABASE_USERNAME"))
+	dbPassword = string(os.Getenv("DATABASE_PASSWORD"))
+	dbHost = string(os.Getenv("DATABASE_HOST"))
+	dbPort = string(os.Getenv("DATABASE_PORT"))
+	dbName = string(os.Getenv("DATABASE_NAME"))
 	cadenaConexion := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=UTF8", dbUsername, dbPassword, dbHost, dbPort, dbName)
 
 	db, err := sql.Open("mysql", cadenaConexion)
