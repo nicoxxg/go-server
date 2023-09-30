@@ -17,7 +17,7 @@ type ClientService interface {
 	FindById(ctx context.Context, id int64) (Cliente, error)
 	FindByEmail(ctx context.Context, email string) (Cliente, error)
 	SaveClient(ctx context.Context, cliente ClientRequest) (Cliente, error)
-	UpdateClient(ctx context.Context, cliente ClientRequest) (Cliente, error)
+	UpdateClient(ctx context.Context, cliente ClientRequest, id int) (Cliente, error)
 }
 
 func NewClientService(clienteRepository ClienteRepository) ClientService {
@@ -26,9 +26,9 @@ func NewClientService(clienteRepository ClienteRepository) ClientService {
 	}
 }
 
-func (s *clienteService) UpdateClient(ctx context.Context, clienteRequest ClientRequest) (Cliente, error) {
+func (s *clienteService) UpdateClient(ctx context.Context, clienteRequest ClientRequest, id int) (Cliente, error) {
 
-	client, err := s.clienteRepository.findByEmail(ctx, clienteRequest.Email)
+	client, err := s.clienteRepository.FindById(ctx, int64(id))
 
 	if err != nil {
 		return Cliente{}, errors.New("error en servicio: Cliente no encontrado")
@@ -36,7 +36,7 @@ func (s *clienteService) UpdateClient(ctx context.Context, clienteRequest Client
 
 	updateClientProperties(&client, clienteRequest)
 
-	result, err := s.clienteRepository.update(ctx, client)
+	result, err := s.clienteRepository.Update(ctx, client)
 
 	if err != nil {
 		return Cliente{}, errors.New("error en servicio: Metodo UPDATE")
@@ -55,7 +55,7 @@ func (s *clienteService) SaveClient(ctx context.Context, cliente ClientRequest) 
 
 	clienteTransforado := requestToClient(cliente)
 
-	response, err := s.clienteRepository.save(ctx, clienteTransforado)
+	response, err := s.clienteRepository.Save(ctx, clienteTransforado)
 
 	if err != nil {
 		return Cliente{}, errors.New("error en servicio: metodo Post")
@@ -67,7 +67,7 @@ func (s *clienteService) SaveClient(ctx context.Context, cliente ClientRequest) 
 // findByEmail implements ClientService.
 func (s *clienteService) FindByEmail(ctx context.Context, email string) (Cliente, error) {
 
-	cliente, err := s.clienteRepository.findByEmail(ctx, email)
+	cliente, err := s.clienteRepository.FindByEmail(ctx, email)
 
 	if err != nil {
 		log.Println("error al traer cliente desde el service", err.Error())
@@ -81,7 +81,7 @@ func (s *clienteService) FindByEmail(ctx context.Context, email string) (Cliente
 // findAll implements ClientService.
 
 func (s *clienteService) FindById(ctx context.Context, id int64) (Cliente, error) {
-	cliente, err := s.clienteRepository.findById(ctx, id)
+	cliente, err := s.clienteRepository.FindById(ctx, id)
 
 	if err != nil {
 		log.Println("error al traer cliente desde el service", err.Error())
@@ -90,7 +90,7 @@ func (s *clienteService) FindById(ctx context.Context, id int64) (Cliente, error
 	return cliente, nil
 }
 func (s *clienteService) FindAll(ctx context.Context) ([]Cliente, error) {
-	productos, err := s.clienteRepository.findAll(ctx)
+	productos, err := s.clienteRepository.FindAll(ctx)
 	if err != nil {
 		log.Println("error al traer clientes desde el service", err.Error())
 		return []Cliente{}, ErrEmptyList

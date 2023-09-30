@@ -31,7 +31,15 @@ func (c *ClienteController) UpdateClient() gin.HandlerFunc {
 			return
 		}
 
-		clienteObtenido, err := c.clienteService.UpdateClient(ctx, request)
+		idParam, err := strconv.Atoi(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"mensaje": "Id invalido",
+			})
+			return
+		}
+
+		clienteObtenido, err := c.clienteService.UpdateClient(ctx, request, idParam)
 
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{

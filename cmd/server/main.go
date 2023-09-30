@@ -6,6 +6,7 @@ import (
 	"log"
 
 	handlerClient "github.com/nicoxxg/go-server/cmd/server/handler/cliente"
+	"github.com/nicoxxg/go-server/pkg/middleware"
 
 	handlerTurno "github.com/nicoxxg/go-server/cmd/server/handler/turno"
 
@@ -40,6 +41,8 @@ func main() {
 
 	clientController := handlerClient.NewClientController(clientService)
 
+	security := middleware.NewSecurity(clienteRepository)
+
 	router.GET("/clientes", clientController.FindAll())
 
 	router.POST("/turno", turnoController.Save())
@@ -52,7 +55,9 @@ func main() {
 
 	router.POST("/cliente", clientController.SaveClient())
 
-	router.PATCH("/cliente/update", clientController.UpdateClient())
+	router.PATCH("/cliente/update/:id", clientController.UpdateClient())
+
+	router.POST("/login", security.Logger())
 
 	if err := router.Run(puerto); err != nil {
 		panic(err)
@@ -82,6 +87,10 @@ func main() {
 // 	}
 
 func connectDB() *sql.DB {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 	var dbUsername, dbPassword, dbHost, dbPort, dbName string
 	dbUsername = "root"
 	dbPassword = "root"

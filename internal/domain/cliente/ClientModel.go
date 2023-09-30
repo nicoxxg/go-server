@@ -8,6 +8,11 @@ type Cliente struct {
 	Contrasena string `json:"contrasena"`
 	Activo     bool   `json:"activo"`
 }
+type ClientJson struct {
+	Email     string
+	Password  string
+	Authority string
+}
 
 type ClientRequest struct {
 	Nombre     string `json:"nombre"`

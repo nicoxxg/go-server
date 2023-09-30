@@ -17,7 +17,7 @@ func NewClienteRepository(database *sql.DB) ClienteRepository {
 }
 
 // update implements ClienteRepository.
-func (r *clienteRepository) update(ctx context.Context, cliente Cliente) (Cliente, error) {
+func (r *clienteRepository) Update(ctx context.Context, cliente Cliente) (Cliente, error) {
 	query := `
         UPDATE go_server.cliente
         SET nombre = ?, apellido = ?, email = ?, contraseña = ?, activo = ?
@@ -58,7 +58,7 @@ func (r *clienteRepository) update(ctx context.Context, cliente Cliente) (Client
 
 // save implements ClienteRepository.
 
-func (r *clienteRepository) save(ctx context.Context, cliente Cliente) (Cliente, error) {
+func (r *clienteRepository) Save(ctx context.Context, cliente Cliente) (Cliente, error) {
 
 	query := `INSERT INTO go_server.cliente(nombre, apellido, email,contraseña, activo)
 	VALUES(?,?,?,?,?)
@@ -95,16 +95,16 @@ func (r *clienteRepository) save(ctx context.Context, cliente Cliente) (Cliente,
 
 // findByEmail implements ClienteRepository.
 
-func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Cliente, error) {
+func (r *clienteRepository) FindByEmail(ctx context.Context, email string) (Cliente, error) {
 
-	query := `SELECT id, nombre, apellido, email, activo
+	query := `SELECT id, nombre, apellido, email, contraseña, activo
 	FROM go_server.cliente
 	WHERE email = ?;
 	`
 
 	var cliente Cliente
 
-	err := r.db.QueryRow(query, email).Scan(&cliente.Id, &cliente.Nombre, &cliente.Apellido, &cliente.Email, &cliente.Activo)
+	err := r.db.QueryRow(query, email).Scan(&cliente.Id, &cliente.Nombre, &cliente.Apellido, &cliente.Email, &cliente.Contrasena, &cliente.Activo)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -119,7 +119,7 @@ func (r *clienteRepository) findByEmail(ctx context.Context, email string) (Clie
 }
 
 // findById implements ClienteRepository.
-func (r *clienteRepository) findById(ctx context.Context, id int64) (Cliente, error) {
+func (r *clienteRepository) FindById(ctx context.Context, id int64) (Cliente, error) {
 	query := `SELECT id, nombre, apellido, email, activo
 	FROM go_server.cliente
 	WHERE id = ?;
@@ -140,7 +140,7 @@ func (r *clienteRepository) findById(ctx context.Context, id int64) (Cliente, er
 }
 
 // findAll implements ClienteRepository.
-func (r *clienteRepository) findAll(ctx context.Context) ([]Cliente, error) {
+func (r *clienteRepository) FindAll(ctx context.Context) ([]Cliente, error) {
 	query := `SELECT id, nombre, apellido, email, activo
 	FROM go_server.cliente;`
 
