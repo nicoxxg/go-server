@@ -12,6 +12,7 @@ type ClientJson struct {
 	Email     string
 	Password  string
 	Authority string
+	Exp       int64
 }
 
 type ClientRequest struct {

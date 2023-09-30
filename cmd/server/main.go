@@ -43,7 +43,7 @@ func main() {
 
 	security := middleware.NewSecurity(clienteRepository)
 
-	router.GET("/clientes", clientController.FindAll())
+	router.GET("/clientes", middleware.Verification(), middleware.RolVerification("admin"), clientController.FindAll())
 
 	router.POST("/turno", turnoController.Save())
 
