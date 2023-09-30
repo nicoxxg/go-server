@@ -55,6 +55,12 @@ func (s *security) Logger() gin.HandlerFunc {
 			})
 			return
 		}
+		if clienteObteido.Activo != true {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"message": "no permitido",
+			})
+			return
+		}
 
 		key := []byte(os.Getenv("TOKEN"))
 
