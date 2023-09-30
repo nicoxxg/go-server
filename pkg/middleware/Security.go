@@ -100,14 +100,33 @@ func Verification() gin.HandlerFunc {
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			exp := int64(claims["exp"].(float64))
+			now := time.Now().Unix()
 
-			if time.Now().Unix() > exp {
+			if now > exp {
+
 				ctx.JSON(http.StatusUnauthorized, gin.H{
 					"message": "Token de autorización ah expirado",
 				})
 				ctx.Abort()
 				return
 			}
+			newExp := now + (2 * 3600)
+
+			claims["exp"] = newExp
+
+			newToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+			newTokenString, err := newToken.SignedString(secretKey)
+
+			if err != nil {
+				ctx.JSON(http.StatusUnauthorized, gin.H{
+					"message": "Error al firmar el nuevo token: " + err.Error(),
+				})
+				ctx.Abort()
+				return
+			}
+			// Devuelve el nuevo token en la respuesta
+			ctx.Header("Authorization", "Bearer "+newTokenString)
 
 			ctx.Next()
 		} else {

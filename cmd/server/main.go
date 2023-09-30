@@ -43,21 +43,23 @@ func main() {
 
 	security := middleware.NewSecurity(clienteRepository)
 
-	router.GET("/clientes", middleware.Verification(), middleware.RolVerification("admin"), clientController.FindAll())
+	router.GET("/api/clientes", middleware.Verification(), middleware.RolVerification("admin"), clientController.FindAll())
 
-	router.POST("/turno", turnoController.Save())
+	router.GET("/api/current", middleware.Verification(), clientController.GetClientCurrent())
 
-	router.GET("/turno", turnoController.FindAllTurnos())
+	router.POST("/api/turno", turnoController.Save())
 
-	router.GET("/cliente/:id", clientController.FindClientById())
+	router.GET("/api/turno", turnoController.FindAllTurnos())
 
-	router.GET("/cliente/email", clientController.FindClienteByEmail())
+	router.GET("/api/cliente/:id", clientController.FindClientById())
 
-	router.POST("/cliente", clientController.SaveClient())
+	router.GET("/api/cliente/email", clientController.FindClienteByEmail())
 
-	router.PATCH("/cliente/update/:id", clientController.UpdateClient())
+	router.POST("/api/cliente", clientController.SaveClient())
 
-	router.POST("/login", security.Logger())
+	router.PATCH("/api/cliente/update/:id", clientController.UpdateClient())
+
+	router.POST("/api/login", security.Logger())
 
 	if err := router.Run(puerto); err != nil {
 		panic(err)

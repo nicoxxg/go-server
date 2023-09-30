@@ -77,7 +77,7 @@ func (s *security) Logger() gin.HandlerFunc {
 		} else {
 			claims["rol"] = "cliente"
 		}
-		claims["exp"] = time.Now().Add(time.Hour * 3).Unix()
+		claims["exp"] = time.Now().Add(time.Second * 30).Unix()
 
 		tokenString, err := token.SignedString(key)
 
